@@ -1,0 +1,3 @@
+[submodule "third-party/wmf2svg"]
+	path = third-party/wmf2svg
+	url = https://github.com/dresch86/wmf2svg.git

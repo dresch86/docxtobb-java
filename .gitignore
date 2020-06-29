@@ -1,0 +1,18 @@
+# Visual Studio Code
+.vscode
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Java specific files / directories
+.settings
+
+# Ignore Gradle build output directory
+bin/
+build/
+
+# Ignore example input/output resources
+*.zip
+*.dat
+*.xml
+~*.docx
