@@ -20,3 +20,12 @@ DocxToBB handles most of these shortcomings allowing flexibility and functionali
 ### For Building
 - Git
 - Gradle 6.4.1 or later
+
+## Additional Notes
+1. DocxToBB is still a W.I.P. and needs testing before production use.
+
+## TODO List
+- [ ] Add better error reporting interfaces
+- [ ] Generate a .txt log of process
+- [ ] Test handling of image resources
+- [ ] Write users manual (i.e. Wiki)
