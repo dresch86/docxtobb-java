@@ -106,7 +106,8 @@ public class App extends Application {
 
             if (clCmdInput.hasOption("headless")) {
                 System.out.println("Starting in headless mode...");
-                Vertx vertx = Vertx.vertx();
+                System.out.println("This feature is not yet implemented!");
+                //Vertx vertx = Vertx.vertx();
             } else {
                 launch(args);
             }

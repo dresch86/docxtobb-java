@@ -25,13 +25,26 @@ import java.nio.charset.StandardCharsets;
 
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
+
+import javafx.geometry.Pos;
 import javafx.application.Platform;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import java.awt.Desktop;
 
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
 
 import javafx.scene.Cursor;
 import javafx.scene.text.Text;
+
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.Dialog;
@@ -44,7 +57,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class AboutDialog extends Dialog<Void> {
+    private Hyperlink hlRepoLink;
+
     private VBox vbMainContainer = new VBox();
+    private String sRepositoryURL = "https://github.com/dresch86/docxtobb-java";
     private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
 
     public AboutDialog() {
@@ -53,6 +69,31 @@ public class AboutDialog extends Dialog<Void> {
         initStyle(StageStyle.UTILITY);
         initModality(Modality.APPLICATION_MODAL);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+
+        hlRepoLink = new Hyperlink(sRepositoryURL);
+        hlRepoLink.setOnAction(event -> {
+            if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    Desktop.getDesktop().browse(new URI(sRepositoryURL));
+                } catch (IOException ioe) {
+                    lMainLogger.error("Error loading repository");
+                } catch (URISyntaxException urse) {
+                    lMainLogger.error("Error parsing repository URL");
+                }
+            } else {
+                final ClipboardContent cbcContentHandler = new ClipboardContent();
+                cbcContentHandler.putString(sRepositoryURL);
+
+                final Clipboard cbSystemClipboard = Clipboard.getSystemClipboard();
+                cbSystemClipboard.setContent(cbcContentHandler);
+
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Link Copied");
+                alert.setHeaderText(null);
+                alert.setContentText("The URL was copied to the system clipboard!");
+                alert.showAndWait();
+            }
+        });
 
         addProgramInfo();
         addLicenseText();
@@ -64,14 +105,19 @@ public class AboutDialog extends Dialog<Void> {
     private void addProgramInfo() {
         GridPane gpProgramInfoBox = new GridPane();
         gpProgramInfoBox.setHgap(5);
+        gpProgramInfoBox.setVgap(5);
 
-        gpProgramInfoBox.add(new Label("Program:"), 0, 0);
-        gpProgramInfoBox.add(new Label("Developer(s):"), 0, 1);
-        gpProgramInfoBox.add(new Label("Repository:"), 0, 2);
+        Label lProgram = new Label("Program:");
+        Label lDevelopers = new Label("Developer(s):");
+        Label lRepository = new Label("Repository:");
+
+        gpProgramInfoBox.add(lProgram, 0, 0);
+        gpProgramInfoBox.add(lDevelopers, 0, 1);
+        gpProgramInfoBox.add(lRepository, 0, 2);
 
         gpProgramInfoBox.add(new Text("DocxToBB"), 1, 0);
         gpProgramInfoBox.add(new Text("Daniel J. Resch, Ph.D."), 1, 1);
-        gpProgramInfoBox.add(new Hyperlink("https://github.com/dresch86/docxtobb-java"), 1, 2);
+        gpProgramInfoBox.add(hlRepoLink, 1, 2);
 
         vbMainContainer.getChildren().add(gpProgramInfoBox);
     }

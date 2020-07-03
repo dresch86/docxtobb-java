@@ -125,7 +125,7 @@ public class Questions {
                                 QuestionType questionType, 
                                 VElement<?> questionRoot, 
                                 int correctAnswerCount,
-                                Map<String, Pair<Boolean, String>> answerKey) {
+                                Map<String, Pair<Boolean, Element>> answerKey) {
         final VElement<?> elRenderChoiceRoot = questionRoot.get("presentation").get("flow").add("flow").attr("class", "RESPONSE_BLOCK")
         .add("response_lid").attr("ident", "response").attr("rcardinality", "Single").attr("rtiming", "No")
             .add("render_choice").attr("shuffle", "Yes").attr("minnumber", "0").attr("maxnumber", "0");
@@ -202,15 +202,19 @@ public class Questions {
             };
         }
 
-        for (Map.Entry<String, Pair<Boolean, String>> response : answerKey.entrySet()) {
-            String sResponseId = RandomStringUtils.randomAlphanumeric(32);
+        String sResponseId = "";
+        Element elImgAns = null;
+
+        for (Map.Entry<String, Pair<Boolean, Element>> response : answerKey.entrySet()) {
+            sResponseId = RandomStringUtils.randomAlphanumeric(32);
+            elImgAns = response.getValue().getValue1().selectFirst("img");
 
             elRenderChoiceRoot.add("flow_label").attr("class", "Block")
             .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
                 .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
                     .add("material")
                         .add("mat_extension")
-                            .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1());
+                            .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html());
 
             bmrRegisterResponseCondVars.accept(response.getValue().getValue0(), sResponseId);
 
@@ -244,7 +248,7 @@ public class Questions {
                 elsImgResources.forEach(imgTag -> csResourceUpdater.accept(imgTag.attr("data-resource-id"), sParentId));
             }
 
-            Map<String, Pair<Boolean, String>> tmResponses = new TreeMap<>();
+            Map<String, Pair<Boolean, Element>> tmResponses = new TreeMap<>();
             Elements elQuestionBoxStack = elQuestionBox.select("tr");
 
             int iCorrectAnswers = 0;
@@ -268,14 +272,14 @@ public class Questions {
 
                         if (elsAnswerContentBolded.size() == 1) {
                             tmResponses.put(elAnsLabelBox.text(), 
-                                            new Pair<Boolean,String>(Boolean.TRUE, elsAnswerContentBolded.get(0).html()));
+                                            new Pair<Boolean,Element>(Boolean.TRUE, elsAnswerContentBolded.get(0)));
                         } else {
                             tmResponses.put(elAnsLabelBox.text(), 
-                                            new Pair<Boolean,String>(Boolean.TRUE, elAnsContent.html()));
+                                            new Pair<Boolean,Element>(Boolean.TRUE, elAnsContent));
                         }
                     } else {
                         tmResponses.put(elAnsLabelBox.text(), 
-                                        new Pair<Boolean,String>(Boolean.FALSE, elAnsContent.html()));
+                                        new Pair<Boolean,Element>(Boolean.FALSE, elAnsContent));
                     }
                 }
             }
@@ -355,9 +359,14 @@ public class Questions {
                         throw new QuestionFormatException("Invalid question format [Q" + (nextQuestionIndex + 1) + "]");
                     }
 
-                    // Only need to check the label column so query every other cell
                     for (int j=0; j<iAnsCellCount; j+=2) {
+                        // Increment correct answer counter to determine question type
                         iAnsSelected += elsQuestionAnswersLayer.get(j).select("p > strong").size();
+
+                        if (elsQuestionAnswersLayer.get(j+1).select("p img").size() > 1) {
+                            // Blackboard only allows 1 image attachment per response...
+                            throw new QuestionFormatException("Response fields cannot contain more than one image attachment [Q" + (nextQuestionIndex + 1) + "]");
+                        }
                     }
                 }
 

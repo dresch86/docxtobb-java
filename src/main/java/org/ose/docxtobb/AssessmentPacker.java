@@ -79,33 +79,23 @@ public class AssessmentPacker {
     }
 
     private boolean readyTempDir(String filename) {
-        try {
-            String sMD5Filename = DigestUtils.md5Hex(filename).toUpperCase();
-            String sSysTmpDir = System.getProperty("java.io.tmpdir");
-            Path pTempRoot = Paths.get(sSysTmpDir);
-    
+        String sMD5Filename = DigestUtils.md5Hex(filename).toUpperCase();
+        String sSysTmpDir = System.getProperty("java.io.tmpdir");
+        Path pTempRoot = Paths.get(sSysTmpDir);
+
+        try {    
             if (Files.exists(pTempRoot)) {
-                pTempOutputDir = pTempRoot.resolve(sMD5Filename);
-                Files.createDirectory(pTempOutputDir);
-
-                pTempOutputDirResources = pTempOutputDir.resolve("csfiles");
-                Files.createDirectory(pTempOutputDirResources);
-
-                pTempOutputDirMedia = pTempOutputDirResources.resolve("home_dir");
-                Files.createDirectory(pTempOutputDirMedia);
+                pTempOutputDir = Files.createDirectory(pTempRoot.resolve(sMD5Filename));
+                pTempOutputDirResources = Files.createDirectory(pTempOutputDir.resolve("csfiles"));
+                pTempOutputDirMedia = Files.createDirectory(pTempOutputDirResources.resolve("home_dir"));
 
                 return true;
             } else {
                 return false;
             }
         } catch (FileAlreadyExistsException de) {
-            if (FileUtils.deleteQuietly(pTempOutputDir.toFile())) {
-                try {
-                    Files.createDirectory(pTempOutputDir);
-                    return true;
-                } catch (IOException ioe) {
-                    return false;
-                }
+            if (FileUtils.deleteQuietly(pTempRoot.resolve(sMD5Filename).toFile())) {
+                return readyTempDir(filename);
             } else {
                 return false;
             }
@@ -175,7 +165,7 @@ public class AssessmentPacker {
                 csrlResLinkHandler.addResource(sResId, sFilename);
 
                 try {
-                    fosImageFile = new FileOutputStream(pTempOutputDir.resolve(sFilename).toFile());
+                    fosImageFile = new FileOutputStream(pTempOutputDirMedia.resolve(sFilename).toFile());
                     sgWMFtoSVGHandler.write(fosImageFile);
                     fosImageFile.close();
                 } catch (IOException ioe) {
@@ -191,7 +181,7 @@ public class AssessmentPacker {
                 csrlResLinkHandler.addResource(sResId, sFilename);
 
                 try {
-                    fosImageFile = new FileOutputStream(pTempOutputDir.resolve(sFilename).toFile());
+                    fosImageFile = new FileOutputStream(pTempOutputDirMedia.resolve(sFilename).toFile());
                     fosImageFile.write(IOUtils.toByteArray(image.getInputStream()));
                     fosImageFile.close();
                 } catch (IOException ioe) {

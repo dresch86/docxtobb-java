@@ -21,6 +21,7 @@ package org.ose.docxtobb.xmlasset;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 import java.nio.file.Path;
 import java.io.FileOutputStream;
@@ -32,11 +33,17 @@ import com.github.djeang.vincerdom.VDocument;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+import org.w3c.dom.CDATASection;
+
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class CSResourceLinks {
     private Path pTempOutputDirMedia;
+    private Consumer<VElement<?>> csrCDataHandler;
 
+    private final Document docW3CDoc;
     private final VDocument vdResourceLinksXML;
     private final Map<String, VElement<?>> maResourceMap;
     private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
@@ -44,6 +51,20 @@ public class CSResourceLinks {
     public CSResourceLinks() {
         maResourceMap = new HashMap<>();
         vdResourceLinksXML = VDocument.of("cms_resource_link_list");
+        docW3CDoc = vdResourceLinksXML.getW3cDocument();
+
+        csrCDataHandler = (element) -> {
+            Element w3cElement = element.getW3cElement();
+            CDATASection cdsNodeData = null;
+
+            if (w3cElement.getNodeName() == "storageType") {
+                cdsNodeData = docW3CDoc.createCDATASection("PUBLIC");
+                w3cElement.appendChild(cdsNodeData);
+            } else if (w3cElement.getNodeName() == "resourceId") {
+                cdsNodeData = docW3CDoc.createCDATASection(w3cElement.getTextContent());
+                w3cElement.replaceChild(cdsNodeData, w3cElement.getFirstChild());
+            }
+        };
     }
 
     private void buildResourceRelation(String resourceId, String filename) {
@@ -70,12 +91,12 @@ public class CSResourceLinks {
     public void addResource(String resourceId, String filename) {
         String sCMSResourceLinkId = "_" + RandomStringUtils.random(7, false, true) + "_1";
 
-        maResourceMap.put(resourceId, vdResourceLinksXML.root().get("cms_resource_link_list")
+        maResourceMap.put(resourceId, vdResourceLinksXML.root()
         .add("cms_resource_link")
             .add("courseId").attr("data-type", "blackboard.data.course.Course").text("DocxToBBImports").__
             .add("parentId").attr("parent_data_type", "asiobject").text("").__
-            .add("resourceId").text("<![CDATA["+resourceId+"]]>").__
-            .add("storageType").text("<![CDATA[PUBLIC]]>").__
+            .add("resourceId").text(resourceId).apply(csrCDataHandler).__
+            .add("storageType").apply(csrCDataHandler).__
             .add("id").attr("data-type", "blackboard.platform.contentsystem.data.CSResourceLink").text(sCMSResourceLinkId).__);
 
         buildResourceRelation(resourceId, filename);

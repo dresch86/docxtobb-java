@@ -20,6 +20,9 @@
 package org.ose.docxtobb;
 
 import java.io.File;
+import java.io.IOException;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import java.util.Optional;
 
@@ -28,9 +31,8 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 
 import javafx.stage.Stage;
-import javafx.stage.DirectoryChooser;
-
 import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 import javafx.scene.image.Image;
@@ -46,6 +48,14 @@ import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
+
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.ScrollPane;
+
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
 
 import org.ose.docxtobb.dialogs.AboutDialog;
 import org.ose.docxtobb.dialogs.CreditsDialog;
@@ -102,6 +112,12 @@ public class GUIController {
     @FXML
     private CheckBox chkRemoveQNums;
 
+    @FXML
+    private AnchorPane apLogOutputBox;
+
+    @FXML
+    private ScrollPane spLogScroller;
+
     private Path pDocxFile;
     private Path pOutputDir;
     private Path pOutputFile;
@@ -114,6 +130,21 @@ public class GUIController {
         stMainStage = mainStage;
         ivWordIcon = new ImageView(new Image(getClass().getResourceAsStream("/msword.png")));
         ivFolderIcon = new ImageView(new Image(getClass().getResourceAsStream("/folder.png")));
+    }
+
+    private void setupLogging() {
+        try {
+            final ConfigurationSource csDocxToBBCustLog = new ConfigurationSource(getClass().getClassLoader().getResourceAsStream("logging.xml"));
+            LoggerContext lcDocxToBBCtx = Configurator.initialize(null, csDocxToBBCustLog);
+        } catch (IOException ioe) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Resource Error");
+            alert.setContentText("A required system resource could not be found....exiting!");
+            alert.showAndWait();
+
+            Platform.exit();
+        }
     }
 
     private boolean pathsExist(String inputFile, String outputDir) {
@@ -221,6 +252,7 @@ public class GUIController {
         });
 
         acInputPanes.setExpandedPane(tpGeneral);
+        setupLogging();
     }
 
     public void shutdown() {
