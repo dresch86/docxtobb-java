@@ -32,7 +32,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class Common {
-    private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
+    private static final Logger lMainLogger = LogManager.getLogger(Common.class.getName());
     
     public static void zipDirectory(Path directory, ZipOutputStream zipOutput) {
         try {

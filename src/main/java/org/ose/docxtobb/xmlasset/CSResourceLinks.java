@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 import java.nio.file.Path;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileOutputStream;
 
 import com.github.djeang.vincerdom.VElement;
 import com.github.djeang.vincerdom.VDocument;
@@ -46,7 +46,7 @@ public class CSResourceLinks {
     private final Document docW3CDoc;
     private final VDocument vdResourceLinksXML;
     private final Map<String, VElement<?>> maResourceMap;
-    private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
+    private static final Logger lMainLogger = LogManager.getLogger(CSResourceLinks.class.getName());
 
     public CSResourceLinks() {
         maResourceMap = new HashMap<>();
@@ -76,8 +76,7 @@ public class CSResourceLinks {
                 .add("resource")
                     .add("identifier").text(resourceId + "#/courses/docxtobb/" + filename);
 
-        int iLastDot = filename.lastIndexOf(".");
-        String sXMLFilename = filename.substring(0, iLastDot) + "__xid-" + resourceId + filename.substring(iLastDot) + ".xml";
+        String sXMLFilename = filename + ".xml";
 
         try {
             FileOutputStream fosRelationXML = new FileOutputStream(pTempOutputDirMedia.resolve(sXMLFilename).toFile());
@@ -88,26 +87,18 @@ public class CSResourceLinks {
         }
     }
 
-    public void addResource(String resourceId, String filename) {
+    public void addResource(String resourceId, String parentId, String filename) {
         String sCMSResourceLinkId = "_" + RandomStringUtils.random(7, false, true) + "_1";
 
         maResourceMap.put(resourceId, vdResourceLinksXML.root()
         .add("cms_resource_link")
             .add("courseId").attr("data-type", "blackboard.data.course.Course").text("DocxToBBImports").__
-            .add("parentId").attr("parent_data_type", "asiobject").text("").__
+            .add("parentId").attr("parent_data_type", "asiobject").text(parentId).__
             .add("resourceId").text(resourceId).apply(csrCDataHandler).__
             .add("storageType").apply(csrCDataHandler).__
             .add("id").attr("data-type", "blackboard.platform.contentsystem.data.CSResourceLink").text(sCMSResourceLinkId).__);
 
         buildResourceRelation(resourceId, filename);
-    }
-
-    public void addParentId(String resourceId, String parentId) {
-        if (maResourceMap.containsKey(resourceId)) {
-            maResourceMap.get(resourceId).get("parentId").text(parentId);
-        } else {
-            lMainLogger.error("Missing resource_id [" + resourceId + "]");
-        }
     }
 
     public void setResourceOutputDir(Path outputDir) {

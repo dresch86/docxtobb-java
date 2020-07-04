@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.function.BiConsumer;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import java.text.DecimalFormat;
 import java.io.FileOutputStream;
 
@@ -40,14 +42,15 @@ import com.github.djeang.vincerdom.VDocument;
 import org.javatuples.Pair;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import org.ose.docxtobb.ImageManager;
 import org.ose.docxtobb.types.QuestionType;
 import org.ose.docxtobb.exceptions.QuestionFormatException;
 
 public class Questions {
+    private ImageManager imImageMgr;
     private Document docHTMLfromWord;
     private BigDecimal bdTotalPoints;
     private BigDecimal bdPointsPerQuestion;
-    private BiConsumer<String, String> csResourceUpdater;
 
     private String sExamID = "";
     private int iQuestionCount = 0;
@@ -61,7 +64,7 @@ public class Questions {
         iQuestionCount = _numQuestions;
 
         bdTotalPoints = new BigDecimal(_points);
-        bdPointsPerQuestion = bdTotalPoints.divide(new BigDecimal(iQuestionCount));
+        bdPointsPerQuestion = bdTotalPoints.divide(new BigDecimal(iQuestionCount), RoundingMode.HALF_EVEN);
 
         vdQuestionXML = VDocument.of("questestinterop");
         veQuestionSection = vdQuestionXML.root()
@@ -168,7 +171,7 @@ public class Questions {
             .add("displayfeedback").attr("linkrefid", "correct").attr("feedbacktype", "Response").__
             .get("conditionvar").get("and");
 
-            BigDecimal bdPointsPerAnswer = bdPointsPerQuestion.divide(new BigDecimal(correctAnswerCount));
+            BigDecimal bdPointsPerAnswer = bdPointsPerQuestion.divide(new BigDecimal(correctAnswerCount), RoundingMode.HALF_EVEN);
             String sPointsPerAnsFmt = new DecimalFormat("0.000000000000000").format(bdPointsPerAnswer);
 
             bmrRegisterResponseCondVars = (correctness, responseId) -> {
@@ -208,13 +211,31 @@ public class Questions {
         for (Map.Entry<String, Pair<Boolean, Element>> response : answerKey.entrySet()) {
             sResponseId = RandomStringUtils.randomAlphanumeric(32);
             elImgAns = response.getValue().getValue1().selectFirst("img");
+            
+            if (elImgAns != null) {
+                String sImgFilename = imImageMgr.getFilename(elImgAns.attr("data-resource-id"));
+                String sRelativePath = imImageMgr.finalizeResponseResource(elImgAns.attr("data-resource-id"));
+                
+                elImgAns.attr("src", sRelativePath);
+                elImgAns.removeAttr("data-resource-id");
 
-            elRenderChoiceRoot.add("flow_label").attr("class", "Block")
-            .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
-                .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
-                    .add("material")
-                        .add("mat_extension")
-                            .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html());
+                elRenderChoiceRoot.add("flow_label").attr("class", "Block")
+                .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
+                    .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
+                        .add("material")
+                            .add("mat_extension")
+                                .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html()).__.__.__.__
+                    .add("flow_mat").attr("class", "FILE_BLOCK")
+                        .add("material")
+                            .add("matapplication").attr("label", sImgFilename).attr("apptype", "application/octet-stream").attr("uri", sRelativePath).attr("embedded", "Inline");
+            } else {
+                elRenderChoiceRoot.add("flow_label").attr("class", "Block")
+                .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
+                    .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
+                        .add("material")
+                            .add("mat_extension")
+                                .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html());
+            }
 
             bmrRegisterResponseCondVars.accept(response.getValue().getValue0(), sResponseId);
 
@@ -245,7 +266,10 @@ public class Questions {
             int iNextId = startId + i;
 
             if (iImgTagCount > 0) {
-                elsImgResources.forEach(imgTag -> csResourceUpdater.accept(imgTag.attr("data-resource-id"), sParentId));
+                elsImgResources.forEach(imgTag -> {
+                    imImageMgr.finalizeQuestionResource(imgTag.attr("data-resource-id"), sParentId);
+                    imgTag.removeAttr("data-resource-id");
+                });
             }
 
             Map<String, Pair<Boolean, Element>> tmResponses = new TreeMap<>();
@@ -471,8 +495,8 @@ public class Questions {
         boolEnableQIdxRemover = enabled;
     }
 
-    public void setResourceHandler(BiConsumer<String, String> callback) {
-        csResourceUpdater = callback;
+    public void setImageManager(ImageManager imageHandler) {
+        imImageMgr = imageHandler;
     }
 
     public void writeBBXML(FileOutputStream os) {

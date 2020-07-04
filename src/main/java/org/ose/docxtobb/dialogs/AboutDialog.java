@@ -61,7 +61,7 @@ public class AboutDialog extends Dialog<Void> {
 
     private VBox vbMainContainer = new VBox();
     private String sRepositoryURL = "https://github.com/dresch86/docxtobb-java";
-    private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
+    private static final Logger lMainLogger = LogManager.getLogger(AboutDialog.class.getName());
 
     public AboutDialog() {
         setTitle("About");

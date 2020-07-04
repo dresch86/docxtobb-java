@@ -40,7 +40,7 @@ import org.apache.logging.log4j.LogManager;
 
 public class CreditsDialog extends Dialog<Void> {
     private VBox vbMainContainer = new VBox();
-    private static final Logger lMainLogger = LogManager.getLogger("DocxToBB");
+    private static final Logger lMainLogger = LogManager.getLogger(CreditsDialog.class.getName());
 
     public CreditsDialog() {
         setTitle("Credits");

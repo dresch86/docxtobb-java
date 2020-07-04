@@ -20,9 +20,6 @@
 package org.ose.docxtobb;
 
 import java.io.File;
-import java.io.IOException;
-
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import java.util.Optional;
 
@@ -52,10 +49,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.ScrollPane;
 
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import org.ose.docxtobb.dialogs.AboutDialog;
 import org.ose.docxtobb.dialogs.CreditsDialog;
@@ -126,25 +121,16 @@ public class GUIController {
     private final ImageView ivWordIcon;
     private final ImageView ivFolderIcon;
 
+    private static final Logger lMainLogger = LogManager.getLogger(GUIController.class.getName());
+
     public GUIController(Stage mainStage) {
         stMainStage = mainStage;
         ivWordIcon = new ImageView(new Image(getClass().getResourceAsStream("/msword.png")));
         ivFolderIcon = new ImageView(new Image(getClass().getResourceAsStream("/folder.png")));
     }
 
-    private void setupLogging() {
-        try {
-            final ConfigurationSource csDocxToBBCustLog = new ConfigurationSource(getClass().getClassLoader().getResourceAsStream("logging.xml"));
-            LoggerContext lcDocxToBBCtx = Configurator.initialize(null, csDocxToBBCustLog);
-        } catch (IOException ioe) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Resource Error");
-            alert.setContentText("A required system resource could not be found....exiting!");
-            alert.showAndWait();
-
-            Platform.exit();
-        }
+    private void displayLogResults() {
+        
     }
 
     private boolean pathsExist(String inputFile, String outputDir) {
@@ -236,6 +222,7 @@ public class GUIController {
                 }
 
                 apConverterTool.loadFromFile(pDocxFile, pOutputFile);
+                apConverterTool.cleanup();
             }
         });
 
@@ -252,7 +239,6 @@ public class GUIController {
         });
 
         acInputPanes.setExpandedPane(tpGeneral);
-        setupLogging();
     }
 
     public void shutdown() {
