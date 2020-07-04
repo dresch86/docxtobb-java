@@ -484,8 +484,8 @@ public class Questions {
 
         if (iPrimaryQuestionBoxesFound == 0) {
             return "No valid primary questions found in supplied Word document";
-        } else if ((iNextQuestionId + 1) != iQuestionCount) {
-            return "DocxToBB found " + (iNextQuestionId + 1) + " question(s), but you identified the presence of " + iQuestionCount + ". This discrepancy should be reconciled for an accurate point value per question calculation!";
+        } else if (iNextQuestionId != iQuestionCount) {
+            return "DocxToBB found " + iNextQuestionId + " question(s), but you identified the presence of " + iQuestionCount + ". This discrepancy should be reconciled for an accurate point value per question calculation!";
         } else {
             return "";
         }
