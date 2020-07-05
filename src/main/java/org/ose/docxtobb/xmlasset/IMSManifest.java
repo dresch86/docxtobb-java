@@ -30,8 +30,8 @@ public class IMSManifest {
     private final VElement<?> veQuestionsNode;
 
     public IMSManifest(String title) {
-        vdIMSManifestXML = VDocument.of("manifest").root().attr("identifier", "man00001").attr("xmlns:bb", "http://www.blackboard.com/content-packaging/").__;
-        veResourcesNode = vdIMSManifestXML.root().add("organizations").add("resources");
+        vdIMSManifestXML = VDocument.of("manifest").root().attr("identifier", "man00001").attr("xmlns:bb", "http://www.blackboard.com/content-packaging/").add("organizations").__.__;
+        veResourcesNode = vdIMSManifestXML.root().add("resources");
         veQuestionsNode = veResourcesNode.add("resource")
             .attr("bb:file", "questions.dat")
             .attr("bb:title", title)

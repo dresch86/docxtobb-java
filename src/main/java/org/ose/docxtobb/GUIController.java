@@ -180,12 +180,31 @@ public class GUIController {
         btnFileDialog.setText("");
         btnFileDialog.setGraphic(ivWordIcon);
         btnFileDialog.setOnAction(event -> {
+            String sFilePath = txtInputFile.getText().trim();
             FileChooser fcFileChooserDialog = new FileChooser();
             fcFileChooserDialog.setTitle("Select Word File...");
             fcFileChooserDialog.getExtensionFilters().addAll(
                     new ExtensionFilter("Word File", "*.docx"),
                     new ExtensionFilter("Word File", "*.doc"));
-            fcFileChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+
+            if (sFilePath.length() > 0) {
+                Path pFile = Path.of(sFilePath);
+
+                if (Files.exists(pFile)) {
+                    Path pFileDir = pFile.getParent();
+
+                    if (pFileDir != null) {
+                        fcFileChooserDialog.setInitialDirectory(pFileDir.toFile());
+                    } else {
+                        fcFileChooserDialog.setInitialDirectory(pFile.toFile());
+                    }
+                } else {
+                    fcFileChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+                }
+            } else {
+                fcFileChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+            }
+
             File fiSelectedFile = fcFileChooserDialog.showOpenDialog(stMainStage);
 
             if (fiSelectedFile != null) {
@@ -200,9 +219,22 @@ public class GUIController {
         btnDirDialog.setText("");
         btnDirDialog.setGraphic(ivFolderIcon);
         btnDirDialog.setOnAction(event -> {
+            String sDirOutPath = txtOutputDir.getText().trim();
             DirectoryChooser dcDirChooserDialog = new DirectoryChooser();
             dcDirChooserDialog.setTitle("Select Output Directory...");
-            dcDirChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+
+            if (sDirOutPath.length() > 0) {
+                Path pDir = Path.of(sDirOutPath);
+
+                if (Files.exists(pDir)) {
+                    dcDirChooserDialog.setInitialDirectory(pDir.toFile());
+                } else {
+                    dcDirChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+                }
+            } else {
+                dcDirChooserDialog.setInitialDirectory(new File(System.getProperty("user.home")));
+            }
+
             File fiSelectedDir = dcDirChooserDialog.showDialog(stMainStage);
 
             if (fiSelectedDir != null) {
@@ -213,6 +245,7 @@ public class GUIController {
         btnConvert.setOnAction(event -> {
             if (pathsExist(txtInputFile.getText(), txtOutputDir.getText())) {
                 AssessmentPacker apConverterTool = new AssessmentPacker();
+                apConverterTool.setExamHeadingText(taDescription.getText(), taInstructions.getText());
                 apConverterTool.setQuestionCount(txtTotalQuestions.getText());
                 apConverterTool.setPointTotal(txtPoints.getText());
                 apConverterTool.setExamTitle(txtTitle.getText());

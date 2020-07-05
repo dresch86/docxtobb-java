@@ -60,6 +60,9 @@ public class AssessmentPacker {
     private int iQuestionCount;
 
     private String sTitle;
+    private String sDescription;
+    private String sInstructions;
+
     private Path pTempOutputDir;
     private boolean boolRemoveNumericalLabels;
 
@@ -207,6 +210,8 @@ public class AssessmentPacker {
     private void createQuestionParser(String html) {
         Questions qQuestionHandler = new Questions(sExamID, sTitle, iQuestionCount, iPoints);
         qQuestionHandler.enableQuestionIndexRemover(boolRemoveNumericalLabels);
+        qQuestionHandler.setExamInstructions(sInstructions);
+        qQuestionHandler.setExamDescription(sDescription);
         qQuestionHandler.setImageManager(imImageMgr);
 
         String sResult = qQuestionHandler.processHTML(html);
@@ -308,10 +313,15 @@ public class AssessmentPacker {
         }
     }
 
+    public void setExamHeadingText(String description, String instructions) {
+        sDescription = description;
+        sInstructions = instructions;
+    }
+
     public void cleanup() {
         try {
-            Files.deleteIfExists(pTempOutputDir);
-            lMainLogger.info("Temporary output files deleted");
+            FileUtils.deleteDirectory(pTempOutputDir.toFile());
+            lMainLogger.info("Temporary output files cleaned up!");
         } catch (IOException ioe) {
             lMainLogger.error(ioe.getMessage());
         }

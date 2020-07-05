@@ -52,12 +52,15 @@ public class Questions {
     private BigDecimal bdTotalPoints;
     private BigDecimal bdPointsPerQuestion;
 
+    private VElement<?> veDescription;
+    private VElement<?> veInstructions;
+
     private String sExamID = "";
     private int iQuestionCount = 0;
     private boolean boolEnableQIdxRemover = false;
 
     private final VDocument vdQuestionXML;
-    private final VElement<VElement<VElement<VDocument>>> veQuestionSection;
+    private final VElement<?> veQuestionSection;
 
     public Questions(String _id, String _title, int _numQuestions, int _points) {
         sExamID = _id;
@@ -88,15 +91,15 @@ public class Questions {
                     .add("qmd_weighting").text("0").__
                     .add("qmd_instructornotes").text("").__.__
                 .add("rubric").attr("view", "All")
-                    .add("flow_mat")
+                    .add("flow_mat").attr("class", "Block")
                         .add("material")
                             .add("mat_extension")
-                                .add("mat_formattedtext").attr("type", "HTML").text("Test instructions here...").__.__.__.__.__
+                                .add("mat_formattedtext").attr("type", "HTML").apply(element -> veInstructions = element).__.__.__.__.__
                 .add("presentation_material")
                     .add("flow_mat").attr("class", "Block")
                         .add("material")
                             .add("mat_extension")
-                                .add("mat_formattedtext").attr("type", "HTML").text("This assessment was auto-generated using docxtobb...").__.__.__.__.__
+                                .add("mat_formattedtext").attr("type", "HTML").apply(element -> veDescription = element).__.__.__.__.__
                 .add("section");
 
         veQuestionSection.add("sectionmetadata")
@@ -197,10 +200,12 @@ public class Questions {
                 if (correctness == Boolean.TRUE) {
                     elCorrectCondsVars.add("varequal").attr("respident", "response").attr("case", "No").text(responseId);
                     elResprocessingRoot.add("respcondition").add("conditionvar").add("varequal").attr("respident", responseId).attr("case", "No").__.__
-                    .add("setvar").attr("variablename", "SCORE").attr("action", "Set").text(sPointsPerAnsFmt);
+                    .add("setvar").attr("variablename", "SCORE").attr("action", "Set").text(sPointsPerAnsFmt).__
+                    .add("displayfeedback").attr("linkrefid", responseId).attr("feedbacktype", "Response");
                 } else {
                     elResprocessingRoot.add("respcondition").add("conditionvar").add("varequal").attr("respident", responseId).attr("case", "No").__.__
-                    .add("setvar").attr("variablename", "SCORE").attr("action", "Set").text("0");
+                    .add("setvar").attr("variablename", "SCORE").attr("action", "Set").text("0").__
+                    .add("displayfeedback").attr("linkrefid", responseId).attr("feedbacktype", "Response");
                 }
             };
         }
@@ -497,6 +502,14 @@ public class Questions {
 
     public void setImageManager(ImageManager imageHandler) {
         imImageMgr = imageHandler;
+    }
+
+    public void setExamDescription(String description) {
+        veDescription.text(description);
+    }
+
+    public void setExamInstructions(String instructions) {
+        veInstructions.text(instructions);
     }
 
     public void writeBBXML(FileOutputStream os) {
