@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 
-import javafx.geometry.Pos;
 import javafx.application.Platform;
 
 import java.net.URI;
@@ -53,6 +52,7 @@ import javafx.scene.control.Hyperlink;
 import javafx.scene.control.ButtonType;
 
 import org.apache.commons.io.IOUtils;
+
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 

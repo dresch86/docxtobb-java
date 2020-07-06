@@ -48,26 +48,10 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.CommandLineParser;
 
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
-
 public class App extends Application {
     private GUIController gicMainInterfaceController;
 
     public App() {
-        try {
-            final ConfigurationSource csDocxToBBCustLog = new ConfigurationSource(getClass().getClassLoader().getResourceAsStream("logging.xml"));
-            LoggerContext lcDocxToBBCtx = Configurator.initialize(null, csDocxToBBCustLog);            
-            lcDocxToBBCtx.updateLoggers();
-        } catch (IOException ioe) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Resource Error");
-            alert.setContentText("A required system resource could not be found....exiting!");
-            alert.showAndWait();
-            Platform.exit();
-        }
     }
 
     @Override
@@ -102,7 +86,7 @@ public class App extends Application {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Error");
             alert.setHeaderText("Missing Application Resource");
-            alert.setContentText("Unable to load the main interface resource!");
+            alert.setContentText(ioe.getMessage());
             alert.showAndWait();
             Platform.exit();
         }

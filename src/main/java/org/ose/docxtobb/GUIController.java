@@ -20,8 +20,11 @@
 package org.ose.docxtobb;
 
 import java.io.File;
+import java.io.IOException;
+
 import javafx.fxml.FXML;
 import java.util.Optional;
+import javafx.application.Platform;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,6 +38,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
@@ -44,13 +48,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.Alert.AlertType;
 
+import javafx.scene.layout.VBox;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.control.ScrollPane;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.ConfigurationSource;
+import org.apache.logging.log4j.core.appender.OutputStreamAppender;
 
 import org.ose.docxtobb.dialogs.AboutDialog;
 import org.ose.docxtobb.dialogs.CreditsDialog;
@@ -78,10 +88,10 @@ public class GUIController {
     private Button btnFileDialog;
 
     @FXML
-    private TextArea taDescription;
+    private TextArea taDirections;
 
     @FXML
-    private TextArea taInstructions;
+    private TextArea taDescription;
 
     @FXML
     private TextField txtTitle;
@@ -117,23 +127,67 @@ public class GUIController {
     private Path pOutputDir;
     private Path pOutputFile;
 
+    private final VBox vbLogStack;
     private final Stage stMainStage;
     private final ImageView ivWordIcon;
     private final ImageView ivFolderIcon;
-
-    private static final Logger lMainLogger = LogManager.getLogger(GUIController.class.getName());
+    private final TextStackStream tssLogOutputStream;
 
     public GUIController(Stage mainStage) {
         stMainStage = mainStage;
+        vbLogStack = new VBox();
+
+        tssLogOutputStream = new TextStackStream();
+        tssLogOutputStream.setVBoxDisplay(vbLogStack);
+
         ivWordIcon = new ImageView(new Image(getClass().getResourceAsStream("/msword.png")));
         ivFolderIcon = new ImageView(new Image(getClass().getResourceAsStream("/folder.png")));
     }
 
-    private void displayLogResults() {
-        
+    private void fixTextAreaBlurriness(TextArea textArea) {
+        ScrollPane spTextScroller = (ScrollPane) textArea.getChildrenUnmodifiable().get(0);
+        spTextScroller.setCache(false);
+
+        for (Node n : spTextScroller.getChildrenUnmodifiable()) {
+            n.setCache(false);
+        }
+    }
+
+    private void connectLogOutputArea() {
+        try {
+            final ConfigurationSource csDocxToBBCustLog = new ConfigurationSource(
+                    getClass().getClassLoader().getResourceAsStream("logging.xml"));
+            final LoggerContext lcDocxToBBCtx = Configurator.initialize(null, csDocxToBBCustLog);
+            final Configuration cfgDocxToBBLogCfg = lcDocxToBBCtx.getConfiguration();
+            final PatternLayout plLogEntryPat = PatternLayout.createDefaultLayout(cfgDocxToBBLogCfg);
+
+            final OutputStreamAppender osaLogOutput = OutputStreamAppender.createAppender(plLogEntryPat, null, tssLogOutputStream, "JFXTextStack", false, true);
+            osaLogOutput.start();
+
+            cfgDocxToBBLogCfg.getLoggerConfig("org.ose.docxtobb").addAppender(osaLogOutput, null, null);
+            lcDocxToBBCtx.updateLoggers();
+        } catch (IOException ioe) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Resource Error");
+            alert.setContentText("A required system resource could not be found....exiting!");
+            alert.showAndWait();
+            Platform.exit();
+        }
     }
 
     private boolean pathsExist(String inputFile, String outputDir) {
+        String sInputFile = inputFile.trim();
+        String sOutputDir = outputDir.trim();
+
+        if (!sInputFile.endsWith(".docx") && !sInputFile.endsWith(".doc")) {
+            return false;
+        }
+
+        if (sOutputDir.length() < 1) {
+            return false;
+        }
+
         pDocxFile = Paths.get(inputFile);
         pOutputDir = Paths.get(outputDir);
 
@@ -177,6 +231,14 @@ public class GUIController {
 
     @FXML
     public void initialize() {
+        apLogOutputBox.getChildren().add(vbLogStack);
+        AnchorPane.setTopAnchor(vbLogStack, 0.0);
+        AnchorPane.setLeftAnchor(vbLogStack, 0.0);
+        AnchorPane.setRightAnchor(vbLogStack, 0.0);
+        AnchorPane.setBottomAnchor(vbLogStack, 0.0);
+        
+        connectLogOutputArea();
+
         btnFileDialog.setText("");
         btnFileDialog.setGraphic(ivWordIcon);
         btnFileDialog.setOnAction(event -> {
@@ -245,7 +307,7 @@ public class GUIController {
         btnConvert.setOnAction(event -> {
             if (pathsExist(txtInputFile.getText(), txtOutputDir.getText())) {
                 AssessmentPacker apConverterTool = new AssessmentPacker();
-                apConverterTool.setExamHeadingText(taDescription.getText(), taInstructions.getText());
+                apConverterTool.setExamHeadingText(taDescription.getText(), taDirections.getText());
                 apConverterTool.setQuestionCount(txtTotalQuestions.getText());
                 apConverterTool.setPointTotal(txtPoints.getText());
                 apConverterTool.setExamTitle(txtTitle.getText());
@@ -256,6 +318,12 @@ public class GUIController {
 
                 apConverterTool.loadFromFile(pDocxFile, pOutputFile);
                 apConverterTool.cleanup();
+            } else {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("Invalid Input");
+                alert.setContentText("Please make sure to choose a valid .docx or .doc file!");
+                alert.showAndWait();
             }
         });
 
@@ -269,6 +337,35 @@ public class GUIController {
         miCredits.setOnAction(event -> {
             CreditsDialog cdCreditsDialogInfo = new CreditsDialog();
             cdCreditsDialogInfo.showAndWait();
+        });
+
+        txtPoints.setTextFormatter(new TextFormatter<String>((change) -> {
+            if (change.isAdded() || change.isReplaced()) {
+                if (!change.getControlNewText().matches("[0-9]+")) {
+                    return null;
+                } else {
+                    return change;
+                }
+            } else {
+                return change;
+            }
+        }));
+
+        txtTotalQuestions.setTextFormatter(new TextFormatter<String>((change) -> {
+            if (change.isAdded() || change.isReplaced()) {
+                if (!change.getControlNewText().matches("[0-9]+")) {
+                    return null;
+                } else {
+                    return change;
+                }
+            } else {
+                return change;
+            }
+        }));
+
+        Platform.runLater(() -> {
+            fixTextAreaBlurriness(taDirections);
+            fixTextAreaBlurriness(taDescription);
         });
 
         acInputPanes.setExpandedPane(tpGeneral);

@@ -69,7 +69,7 @@
                                        </tooltip></Label>
                                     <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <children>
-                                          <TextField fx:id="txtInputFile" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
+                                          <TextField fx:id="txtInputFile" disable="true" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
                                           <Button fx:id="btnFileDialog" mnemonicParsing="false" text="Button" />
                                        </children>
                                     </HBox>
@@ -79,7 +79,7 @@
                                        </tooltip></Label>
                                     <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                        <children>
-                                          <TextField fx:id="txtOutputDir" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
+                                          <TextField fx:id="txtOutputDir" disable="true" editable="false" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
                                           <Button fx:id="btnDirDialog" mnemonicParsing="false" text="Button" />
                                        </children>
                                     </HBox>
@@ -120,7 +120,7 @@
       </AnchorPane>
       <AnchorPane maxHeight="-Infinity" minHeight="-Infinity" prefHeight="200.0">
          <children>
-            <ScrollPane fx:id="spLogScroller" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <ScrollPane fx:id="spLogScroller" fitToWidth="true" prefHeight="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <content>
                 <AnchorPane fx:id="apLogOutputBox" minHeight="0.0" minWidth="0.0" prefHeight="200.0" />
               </content>
