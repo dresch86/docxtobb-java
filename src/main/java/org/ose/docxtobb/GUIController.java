@@ -55,15 +55,10 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.AnchorPane;
 
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.apache.logging.log4j.core.layout.PatternLayout;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
-import org.apache.logging.log4j.core.appender.OutputStreamAppender;
-
 import org.ose.docxtobb.dialogs.AboutDialog;
 import org.ose.docxtobb.dialogs.CreditsDialog;
+
+import org.ose.docxtobb.logging.TextStackAppender;
 
 public class GUIController {
     @FXML
@@ -131,14 +126,12 @@ public class GUIController {
     private final Stage stMainStage;
     private final ImageView ivWordIcon;
     private final ImageView ivFolderIcon;
-    private final TextStackStream tssLogOutputStream;
 
     public GUIController(Stage mainStage) {
         stMainStage = mainStage;
         vbLogStack = new VBox();
-
-        tssLogOutputStream = new TextStackStream();
-        tssLogOutputStream.setVBoxDisplay(vbLogStack);
+        Common.configureTextStackLogger();
+        TextStackAppender.setStackBox(vbLogStack);
 
         ivWordIcon = new ImageView(new Image(getClass().getResourceAsStream("/msword.png")));
         ivFolderIcon = new ImageView(new Image(getClass().getResourceAsStream("/folder.png")));
@@ -150,29 +143,6 @@ public class GUIController {
 
         for (Node n : spTextScroller.getChildrenUnmodifiable()) {
             n.setCache(false);
-        }
-    }
-
-    private void connectLogOutputArea() {
-        try {
-            final ConfigurationSource csDocxToBBCustLog = new ConfigurationSource(
-                    getClass().getClassLoader().getResourceAsStream("logging.xml"));
-            final LoggerContext lcDocxToBBCtx = Configurator.initialize(null, csDocxToBBCustLog);
-            final Configuration cfgDocxToBBLogCfg = lcDocxToBBCtx.getConfiguration();
-            final PatternLayout plLogEntryPat = PatternLayout.createDefaultLayout(cfgDocxToBBLogCfg);
-
-            final OutputStreamAppender osaLogOutput = OutputStreamAppender.createAppender(plLogEntryPat, null, tssLogOutputStream, "JFXTextStack", false, true);
-            osaLogOutput.start();
-
-            cfgDocxToBBLogCfg.getLoggerConfig("org.ose.docxtobb").addAppender(osaLogOutput, null, null);
-            lcDocxToBBCtx.updateLoggers();
-        } catch (IOException ioe) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Resource Error");
-            alert.setContentText("A required system resource could not be found....exiting!");
-            alert.showAndWait();
-            Platform.exit();
         }
     }
 
@@ -236,8 +206,6 @@ public class GUIController {
         AnchorPane.setLeftAnchor(vbLogStack, 0.0);
         AnchorPane.setRightAnchor(vbLogStack, 0.0);
         AnchorPane.setBottomAnchor(vbLogStack, 0.0);
-        
-        connectLogOutputArea();
 
         btnFileDialog.setText("");
         btnFileDialog.setGraphic(ivWordIcon);

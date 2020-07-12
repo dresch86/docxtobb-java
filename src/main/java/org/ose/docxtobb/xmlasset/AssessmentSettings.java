@@ -28,8 +28,8 @@ public class AssessmentSettings {
     private final VDocument vdSettingsXML;
 
     public AssessmentSettings(String examId, int totalPoints) {
-        vdSettingsXML = VDocument.of("ASSESSMENTCREATIONSETTINGS").root()
-        .add("ASSESSMENTCREATIONSETTING").attr("id", RandomStringUtils.randomAlphanumeric(32)).__
+        vdSettingsXML = VDocument.of("ASSESSMENTCREATIONSETTINGS");
+        vdSettingsXML.root().add("ASSESSMENTCREATIONSETTING").attr("id", RandomStringUtils.randomAlphanumeric(32))
         .add("QTIASSESSMENTID").attr("value", examId).__
         .add("ANSWERFEEDBACKENABLED").text("true").__
         .add("QUESTIONATTACHMENTSENABLED").text("true").__
@@ -42,7 +42,7 @@ public class AssessmentSettings {
         .add("ANSWERRANDOMORDERENABLED").text("true").__
         .add("ANSWERORIENTATIONENABLED").text("true").__
         .add("ANSWERNUMBEROPTIONSENABLED").text("true").__
-        .add("USEPOINTSFROMSOURCEBYDEFAULT").text("true").__.__;
+        .add("USEPOINTSFROMSOURCEBYDEFAULT").text("true");
     }
 
     public void writeBBXML(FileOutputStream os) {
