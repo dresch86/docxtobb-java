@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.apache.commons.io.FilenameUtils;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Filter;
@@ -62,22 +64,98 @@ public class Common {
         Configurator.initialize(builder.build());
     }
 
+    public static String imageMime(String filename) throws Exception {
+        switch (FilenameUtils.getExtension(filename)) {
+            case "wmf":
+                return "image/x-wmf";
+            case "png":
+                return "image/png";
+            case "bmp":
+                return "image/bmp";
+            case "cod":
+                return "image/cis-cod";
+            case "gif":
+                return "image/gif";
+            case "ief":
+                return "image/ief";
+            case "jpg":
+            case "jpeg":
+                return "image/jpg";
+            case "jfif":
+                return "image/pipeg";
+            case "svg":
+                return "image/svg+xml";
+            case "tiff":
+                return "image/tiff";
+            case "ras":
+                return "image/x-cmu-raster";
+            case "cmx":
+                return "image/x-cmx";
+            case "ico":
+                return "image/x-icon";
+            case "pnm":
+                return "image/x-portable-anymap";
+            case "pbm":
+                return "image/x-portable-bitmap";
+            case "pgm":
+                return "image/x-portable-graymap";
+            case "xwd":
+                return "image/x-xwindowdump";
+            default:
+                throw new Exception("Unsupported Image Type");
+        }
+    }
+
+    public static String imageExt(String mimeType) throws Exception {
+        switch (mimeType) {
+            case "image/x-wmf":
+                return "wmf";
+            case "image/png":
+                return "png";
+            case "image/bmp":
+                return "bmp";
+            case "image/cis-cod":
+                return "cod";
+            case "image/gif":
+                return "gif";
+            case "image/ief":
+                return "ief";
+            case "image/jpg":
+            case "image/jpeg":
+                return "jpg";
+            case "image/pipeg":
+                return "jfif";
+            case "image/svg+xml":
+                return "svg";
+            case "image/tiff":
+                return "tiff";
+            case "image/x-cmu-raster":
+                return "ras";
+            case "image/x-cmx":
+                return "cmx";
+            case "image/x-icon":
+                return "ico";
+            case "image/x-portable-anymap":
+                return "pnm";
+            case "image/x-portable-bitmap":
+                return "pbm";
+            case "image/x-portable-graymap":
+                return "pgm";
+            case "image/x-xwindowdump":
+                return "xwd";
+            default:
+                throw new Exception("Unsupported Image Type");
+        }
+    }
+
     public static void zipDirectory(Path directory, ZipOutputStream zipOutput) {
         try {
             Files.walk(directory).forEach(path -> {
                 try {
                     Path pRelativePath = directory.relativize(path);
                     File file = path.toFile();
-    
-                    if (file.isDirectory()) {
-                        File[] files = file.listFiles();
-                        
-                        if (files == null || files.length == 0) {
-                            zipOutput.putNextEntry(new ZipEntry(
-                                pRelativePath.toString() + File.separator));
-                                    zipOutput.closeEntry();
-                        }
-                    } else {
+
+                    if (file.isFile()) {
                         zipOutput.putNextEntry(new ZipEntry(pRelativePath.toString()));
                         zipOutput.write(Files.readAllBytes(path));
                         zipOutput.closeEntry();

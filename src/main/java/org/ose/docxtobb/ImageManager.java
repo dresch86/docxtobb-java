@@ -1,6 +1,7 @@
 package org.ose.docxtobb;
 
 import java.util.Map;
+import java.util.Base64;
 import java.util.HashMap;
 
 import java.io.IOException;
@@ -12,7 +13,10 @@ import java.nio.file.Files;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import org.ose.docxtobb.xmlasset.IMSManifest;
+import org.ose.docxtobb.types.ImagePresentation;
 import org.ose.docxtobb.xmlasset.CSResourceLinks;
 
 public class ImageManager {
@@ -51,17 +55,31 @@ public class ImageManager {
         }
     }
 
-    public String finalizeResponseResource(String resourceId) {
+    public String finalizeResponseResource(String resourceId, ImagePresentation imPresentation) {
         if (hmFileMappedIds.containsKey(resourceId)) {
             String sFilename = hmFileMappedIds.get(resourceId);
             
             try {
-                Path pMovedFilename = Files.move(pTempOutputDirMedia.resolve(sFilename), pTempOutputDirRespResources.resolve(sFilename));
-                String sFileRelPath = pTempOutputDirRespResources.relativize(pMovedFilename).toString();
-                imsManifestHandler.addResponseFileResource(sFileRelPath);
-                return sFileRelPath;
+                if (imPresentation == ImagePresentation.INLINE) {
+                    Path pImagePath = pTempOutputDirMedia.resolve(sFilename);
+                    byte[] byaImage = Files.readAllBytes(pImagePath);
+                    String base64 = Base64.getEncoder().encodeToString(byaImage);
+                    Files.delete(pImagePath);
+
+                    return ("data:" + Common.imageMime(sFilename) + ";base64," + base64);
+                } else {
+                    Path pRespResHashDir = Files.createDirectory(pTempOutputDirRespResources.resolve(DigestUtils.md5Hex(sFilename).toLowerCase()));
+                    Path pMovedFilename = Files.move(pTempOutputDirMedia.resolve(sFilename), pRespResHashDir.resolve(sFilename));
+                    String sFileRelPath = pTempOutputDirRespResources.relativize(pMovedFilename).toString();
+                    imsManifestHandler.addResponseFileResource(sFileRelPath);
+
+                    return sFileRelPath;
+                }
             } catch (IOException ioe) {
                 lMainLogger.error(ioe.getMessage());
+                return "";
+            } catch (Exception e) {
+                lMainLogger.error("Image file extension not supported");
                 return "";
             }
         } else {

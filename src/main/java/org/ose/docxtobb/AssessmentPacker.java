@@ -105,51 +105,9 @@ public class AssessmentPacker {
         }
     }
 
-    private String imageExt(String mimeType) throws Exception {
-        switch (mimeType) {
-            case "image/x-wmf":
-                return "wmf";
-            case "image/png":
-                return "png";
-            case "image/bmp":
-                return "bmp";
-            case "image/cis-cod":
-                return "cod";
-            case "image/gif":
-                return "gif";
-            case "image/ief":
-                return "ief";
-            case "image/jpg":
-            case "image/jpeg":
-                return "jpg";
-            case "image/pipeg":
-                return "jfif";
-            case "image/svg+xml":
-                return "svg";
-            case "image/tiff":
-                return "tiff";
-            case "image/x-cmu-raster":
-                return "ras";
-            case "image/x-cmx":
-                return "cmx";
-            case "image/x-icon":
-                return "ico";
-            case "image/x-portable-anymap":
-                return "pnm";
-            case "image/x-portable-bitmap":
-                return "pbm";
-            case "image/x-portable-graymap":
-                return "pgm";
-            case "image/x-xwindowdump":
-                return "xwd";
-            default:
-                throw new Exception("Unsupported Image Type");
-        }
-    }
-
     private Map<String, String> processImage(Image image) {
         try {
-            String sFileExt = imageExt(image.getContentType());
+            String sFileExt = Common.imageExt(image.getContentType());
             String sFilename = "";
             String sResId = "";
 
@@ -174,8 +132,6 @@ public class AssessmentPacker {
                     if (osImageStream != null) osImageStream.close();
                 }
             } else {
-                // String base64 = Base64.getEncoder().encodeToString(IOUtils.toByteArray(image.getInputStream()));
-                // String src = "data:" + image.getContentType() + ";base64," + base64;
                 sResId = RandomStringUtils.random(7, false, true) + "_1";
                 sFilename = "Image_" + iImageCount + "__xid-" + sResId + "." + sFileExt;
                 imImageMgr.cacheImage(sResId, sFilename, IOUtils.toByteArray(image.getInputStream()));

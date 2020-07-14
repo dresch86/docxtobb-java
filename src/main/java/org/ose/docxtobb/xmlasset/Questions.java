@@ -44,6 +44,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import org.ose.docxtobb.ImageManager;
 import org.ose.docxtobb.types.QuestionType;
+import org.ose.docxtobb.types.ImagePresentation;
 import org.ose.docxtobb.exceptions.QuestionFormatException;
 
 public class Questions {
@@ -128,14 +129,50 @@ public class Questions {
         return questionHTML;
     }
 
+    private boolean isIsolatedImg(Element responseBox) {
+        Elements elsNonImgTags = responseBox.select("p :not(img)");
+
+        if (elsNonImgTags.size() > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void inlineResponseImgs(String responseId, Element responseBox, final VElement<?> renderChoiceRoot) {
+        Elements elsAnsImgs = responseBox.select("img");
+        int iImgCount = elsAnsImgs.size();
+        Element elCurrentImgTag = null;
+
+        for (int i=0; i<iImgCount; i++) {
+            elCurrentImgTag = elsAnsImgs.get(i);
+            String sBase64Embed = imImageMgr.finalizeResponseResource(elCurrentImgTag.attr("data-resource-id"), ImagePresentation.INLINE);
+            elCurrentImgTag.removeAttr("data-resource-id");
+            elCurrentImgTag.attr("src", sBase64Embed);
+        }
+
+        renderChoiceRoot.add("flow_label").attr("class", "Block")
+        .add("response_label").attr("ident", responseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
+            .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
+                .add("material")
+                    .add("mat_extension")
+                        .add("mat_formattedtext").attr("type", "HTML").text(responseBox.html());        
+    }
+
     private void addResponses(int qid,
                                 QuestionType questionType, 
                                 VElement<?> questionRoot, 
                                 int correctAnswerCount,
                                 Map<String, Pair<Boolean, Element>> answerKey) {
+        String sShuffle = "Yes";
+
+        if (!mAdvancedOps.get("RANDOM_RESPS")) {
+            sShuffle = "No";
+        }
+
         final VElement<?> elRenderChoiceRoot = questionRoot.get("presentation").get("flow").add("flow").attr("class", "RESPONSE_BLOCK")
         .add("response_lid").attr("ident", "response").attr("rcardinality", "Single").attr("rtiming", "No")
-            .add("render_choice").attr("shuffle", "Yes").attr("minnumber", "0").attr("maxnumber", "0");
+            .add("render_choice").attr("shuffle", sShuffle).attr("minnumber", "0").attr("maxnumber", "0");
 
         final VElement<?> elResprocessingRoot = questionRoot.add("resprocessing").attr("scoremodel", "SumOfScores")
         .add("outcomes")
@@ -212,36 +249,45 @@ public class Questions {
         }
 
         String sResponseId = "";
-        Element elImgAns = null;
+        Elements elsAnsImgs = null;
 
         for (Map.Entry<String, Pair<Boolean, Element>> response : answerKey.entrySet()) {
             sResponseId = RandomStringUtils.randomAlphanumeric(32);
-            elImgAns = response.getValue().getValue1().selectFirst("img");
-            
-            if (elImgAns != null) {
-                String sImgFilename = imImageMgr.getFilename(elImgAns.attr("data-resource-id"));
-                String sRelativePath = imImageMgr.finalizeResponseResource(elImgAns.attr("data-resource-id"));
-                
-                elImgAns.attr("src", sRelativePath);
-                elImgAns.removeAttr("data-resource-id");
+            elsAnsImgs = response.getValue().getValue1().select("img");
 
-                elRenderChoiceRoot.add("flow_label").attr("class", "Block")
-                .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
-                    .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
-                        .add("material")
-                            .add("mat_extension")
-                                .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html()).__.__.__.__
-                    .add("flow_mat").attr("class", "FILE_BLOCK")
-                        .add("material")
-                            .add("matapplication").attr("label", sImgFilename).attr("apptype", "application/octet-stream").attr("uri", sRelativePath).attr("embedded", "Inline");
-            } else {
+            if (elsAnsImgs.size() == 0) {
                 elRenderChoiceRoot.add("flow_label").attr("class", "Block")
                 .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
                     .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
                         .add("material")
                             .add("mat_extension")
                                 .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html());
-            }
+            } else {
+                if (isIsolatedImg(response.getValue().getValue1())) {
+                    // Must inline image since response field cannot be empty
+                    inlineResponseImgs(sResponseId, response.getValue().getValue1(), elRenderChoiceRoot);
+                } else {
+                    if (!mAdvancedOps.get("INLINE_RIMGS") && (elsAnsImgs.size() == 1)) {
+                        // Image can only be added as an attachment if there are 1) other nodes; 2) inlining is disabled; 3) there is only 1 image
+                        Element elImgTag = elsAnsImgs.get(0);
+                        String sImgFilename = imImageMgr.getFilename(elImgTag.attr("data-resource-id"));
+                        String sRelativePath = imImageMgr.finalizeResponseResource(elImgTag.attr("data-resource-id"), ImagePresentation.ATTACHMENT);
+                        elImgTag.remove();
+                        
+                        elRenderChoiceRoot.add("flow_label").attr("class", "Block")
+                        .add("response_label").attr("ident", sResponseId).attr("shuffle", "Yes").attr("rarea", "Ellipse").attr("rrange", "Exact")
+                            .add("flow_mat").attr("class", "FORMATTED_TEXT_BLOCK")
+                                .add("material")
+                                    .add("mat_extension")
+                                        .add("mat_formattedtext").attr("type", "HTML").text(response.getValue().getValue1().html()).__.__.__.__
+                            .add("flow_mat").attr("class", "FILE_BLOCK")
+                                .add("material")
+                                    .add("matapplication").attr("label", sImgFilename).attr("apptype", "application/octet-stream").attr("uri", sRelativePath).attr("embedded", "Inline");
+                    } else {
+                        inlineResponseImgs(sResponseId, response.getValue().getValue1(), elRenderChoiceRoot);
+                    }
+                }
+            }        
 
             bmrRegisterResponseCondVars.accept(response.getValue().getValue0(), sResponseId);
 
