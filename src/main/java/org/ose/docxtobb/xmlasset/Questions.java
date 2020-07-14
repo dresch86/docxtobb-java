@@ -51,6 +51,7 @@ public class Questions {
     private Document docHTMLfromWord;
     private BigDecimal bdTotalPoints;
     private BigDecimal bdPointsPerQuestion;
+    private Map<String, Boolean> mAdvancedOps;
 
     private VElement<?> veDescription;
     private VElement<?> veInstructions;
@@ -498,6 +499,10 @@ public class Questions {
 
     public void enableQuestionIndexRemover(boolean enabled) {
         boolEnableQIdxRemover = enabled;
+    }
+
+    public void setAdvancedOptions(Map<String, Boolean> advOps) {
+        mAdvancedOps = advOps;
     }
 
     public void setImageManager(ImageManager imageHandler) {

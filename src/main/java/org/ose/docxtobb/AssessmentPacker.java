@@ -64,6 +64,7 @@ public class AssessmentPacker {
     private String sInstructions;
 
     private Path pTempOutputDir;
+    private Map<String, Boolean> mAdvancedOps;
     private boolean boolRemoveNumericalLabels;
 
     private final ImageManager imImageMgr = new ImageManager();
@@ -212,6 +213,7 @@ public class AssessmentPacker {
         qQuestionHandler.enableQuestionIndexRemover(boolRemoveNumericalLabels);
         qQuestionHandler.setExamInstructions(sInstructions);
         qQuestionHandler.setExamDescription(sDescription);
+        qQuestionHandler.setAdvancedOptions(mAdvancedOps);
         qQuestionHandler.setImageManager(imImageMgr);
 
         String sResult = qQuestionHandler.processHTML(html);
@@ -316,6 +318,10 @@ public class AssessmentPacker {
     public void setExamHeadingText(String description, String instructions) {
         sDescription = description;
         sInstructions = instructions;
+    }
+
+    public void setAdvancedOptions(Map<String, Boolean> advOps) {
+        mAdvancedOps = advOps;
     }
 
     public void cleanup() {

@@ -25,13 +25,8 @@ import java.nio.file.Files;
 import java.io.File;
 import java.io.IOException;
 
-import java.util.Set;
-import java.util.HashSet;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javafx.scene.layout.VBox;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

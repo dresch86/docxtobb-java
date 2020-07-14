@@ -20,10 +20,12 @@
 package org.ose.docxtobb;
 
 import java.io.File;
-import java.io.IOException;
+
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Optional;
 
 import javafx.fxml.FXML;
-import java.util.Optional;
 import javafx.application.Platform;
 
 import java.nio.file.Path;
@@ -44,6 +46,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.TitledPane;
@@ -117,6 +120,15 @@ public class GUIController {
 
     @FXML
     private ScrollPane spLogScroller;
+
+    @FXML
+    private ChoiceBox<String> cbxRandomResp;
+
+    @FXML
+    private ChoiceBox<String> cbxInlineQImgs;
+
+    @FXML
+    private ChoiceBox<String> cbxInlineRImgs;
 
     private Path pDocxFile;
     private Path pOutputDir;
@@ -274,11 +286,17 @@ public class GUIController {
 
         btnConvert.setOnAction(event -> {
             if (pathsExist(txtInputFile.getText(), txtOutputDir.getText())) {
+                Map<String, Boolean> mAdvOps = new HashMap<>();
+                mAdvOps.put("INLINE_QIMGS", (cbxInlineQImgs.getValue() == "Yes"));
+                mAdvOps.put("INLINE_RIMGS", (cbxInlineRImgs.getValue() == "Yes"));
+                mAdvOps.put("RANDOM_RESPS", (cbxRandomResp.getValue() == "Yes"));
+
                 AssessmentPacker apConverterTool = new AssessmentPacker();
                 apConverterTool.setExamHeadingText(taDescription.getText(), taDirections.getText());
                 apConverterTool.setQuestionCount(txtTotalQuestions.getText());
                 apConverterTool.setPointTotal(txtPoints.getText());
                 apConverterTool.setExamTitle(txtTitle.getText());
+                apConverterTool.setAdvancedOptions(mAdvOps);
 
                 if (chkRemoveQNums.isSelected()) {
                     apConverterTool.removeQuestionNumbering(true);
@@ -293,6 +311,22 @@ public class GUIController {
                 alert.setContentText("Please make sure to choose a valid .docx or .doc file!");
                 alert.showAndWait();
             }
+        });
+
+        btnReset.setOnAction(event -> {
+            Platform.runLater(() -> {
+                txtTitle.setText("");
+                txtPoints.setText("");
+                txtInputFile.setText("");
+                txtOutputDir.setText("");
+                txtTotalQuestions.setText("");
+
+                taDirections.setText("");
+                taDescription.setText("");
+
+                vbLogStack.getChildren().clear();
+                chkRemoveQNums.setSelected(false);
+            });
         });
 
         miQuit.setOnAction(event -> stMainStage.close());
