@@ -72,6 +72,13 @@
                                     <Label text="How many points is this exam worth?" GridPane.rowIndex="2" />
                                     <TextField fx:id="txtPoints" maxWidth="-Infinity" prefWidth="100.0" GridPane.rowIndex="3" />
                                     <Label text="How many questions does this exam have?" GridPane.rowIndex="4" />
+                                    <TextField fx:id="txtTotalQuestions" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.rowIndex="5" />
+                                    <Label text="Remove question numbering if present?" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                       <tooltip>
+                                          <Tooltip text="This option removes question numbering in the output package. (i.e &quot;2. What color is the sky?&quot; will be output as &quot;What color is the sky?&quot;) " />
+                                       </tooltip>
+                                    </Label>
+                                    <CheckBox fx:id="chkRemoveQNums" mnemonicParsing="false" text="Yes" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                     <Label text="Choose the location of the Word document." GridPane.columnIndex="1">
                                        <tooltip>
                                           <Tooltip text="Only .docx and .doc files are supported." />
@@ -92,13 +99,6 @@
                                           <Button fx:id="btnDirDialog" mnemonicParsing="false" text="Button" />
                                        </children>
                                     </HBox>
-                                    <TextField fx:id="txtTotalQuestions" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" GridPane.rowIndex="5" />
-                                    <Label text="Remove question numbering if present?" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                                       <tooltip>
-                                          <Tooltip text="This option removes question numbering in the output package. (i.e &quot;2. What color is the sky?&quot; will be output as &quot;What color is the sky?&quot;) " />
-                                       </tooltip>
-                                    </Label>
-                                    <CheckBox fx:id="chkRemoveQNums" mnemonicParsing="false" text="Yes" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                                  </children>
                               </GridPane>
                            </children>

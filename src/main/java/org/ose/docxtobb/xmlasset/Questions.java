@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.function.BiConsumer;
 
 import java.math.BigDecimal;
@@ -63,6 +65,7 @@ public class Questions {
 
     private final VDocument vdQuestionXML;
     private final VElement<?> veQuestionSection;
+    private final Pattern patQuestionLbl = Pattern.compile("^(?:\\p{Print}*?)(#?[0-9]+[\\.|\\)]\\s*)(?:\\p{Print}*?)$", Pattern.UNICODE_CHARACTER_CLASS);
 
     public Questions(String _id, String _title, int _numQuestions, int _points) {
         sExamID = _id;
@@ -125,8 +128,16 @@ public class Questions {
     }
 
     private String removeNumericalIndex(String questionHTML) {
-        // TODO Implement removal of question indexes imported from .docx file
-        return questionHTML;
+        Matcher matQuestionLbl = patQuestionLbl.matcher(questionHTML);
+        String sSanitizedQuestionHTML = questionHTML;
+
+        if (matQuestionLbl.matches()) {
+            sSanitizedQuestionHTML = questionHTML.substring(0, matQuestionLbl.start(1)) + questionHTML.substring(matQuestionLbl.end(1));
+        } else {
+            System.out.println(questionHTML);
+        }
+
+        return sSanitizedQuestionHTML;
     }
 
     private boolean isIsolatedImg(Element responseBox) {

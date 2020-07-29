@@ -7,11 +7,6 @@
     <Console name="Console" target="SYSTEM_OUT">
         <PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} %-5level %logger - %msg%n" />
     </Console>
-    <File name="DocxToBBMainLog" fileName="${sys:java.io.tmpdir}/docxtobb.log">
-      <PatternLayout>
-        <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
-      </PatternLayout>
-    </File>
   </Appenders>
   <Loggers>
     <Logger name="org.ose.docxtobb" level="info" additivity="false">

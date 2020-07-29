@@ -304,6 +304,12 @@ public class GUIController {
 
                 apConverterTool.loadFromFile(pDocxFile, pOutputFile);
                 apConverterTool.cleanup();
+
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Conversion Status");
+                alert.setHeaderText("Conversion Completed");
+                alert.setContentText("Your conversion has finished! Please be sure to look your exam over in Blackboard before deploying as we are not liable for errors.");
+                alert.showAndWait();
             } else {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.setTitle("Error");
