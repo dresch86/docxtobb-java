@@ -9,8 +9,9 @@ Most converters that accept .doc(x) or .txt **[See Note 1]** files:
 1. Do not handle vector-based resources (i.e. WMF) at all
 1. Are proprietary
 
-> Note 1: DocxToBB does not accept .txt files as input since many tools already work well with the limitations of these files
-> Note 2: Feature coming soon...
+> **Note 1:** DocxToBB does not accept .txt files as input since many tools already work well with the limitations of these files
+> 
+> **Note 2:** Feature coming soon...
 
 DocxToBB handles most of these shortcomings allowing flexibility and functionality to take priority.
 
