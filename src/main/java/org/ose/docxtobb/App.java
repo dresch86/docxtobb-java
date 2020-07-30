@@ -36,12 +36,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert.AlertType;
 
-import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.file.FileSystemException;
-
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -103,7 +97,6 @@ public class App extends Application {
             if (clCmdInput.hasOption("headless")) {
                 System.out.println("Starting in headless mode...");
                 System.out.println("This feature is not yet implemented!");
-                //Vertx vertx = Vertx.vertx();
             } else {
                 launch(args);
             }
