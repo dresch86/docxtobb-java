@@ -131,7 +131,7 @@ public class AboutDialog extends Dialog<Void> {
         taLicense.setFocusTraversable(false);
 
         try {
-            InputStream isLicenseFile = getClass().getClassLoader().getResourceAsStream("LICENSE.txt");
+            InputStream isLicenseFile = getClass().getClassLoader().getResourceAsStream("license.txt");
             taLicense.setText(IOUtils.toString(isLicenseFile, StandardCharsets.UTF_8.name()));
         } catch (IOException ioe) {
             taLicense.setText("Error loading license file");
