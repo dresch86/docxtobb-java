@@ -10,14 +10,15 @@ plugins {
 
     // For non-modularized packaging
     id 'org.beryx.runtime' version '1.11.2'
+
+    // For FAT jat
+    id "com.github.johnrengelman.shadow" version "6.0.0"
 }
 
 sourceCompatibility = JavaVersion.VERSION_14
 targetCompatibility = JavaVersion.VERSION_14
 
 repositories {
-    // Use jcenter for resolving dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
@@ -60,8 +61,8 @@ dependencies {
 }
 
 javafx {
-    version = "14"
-    modules = ['javafx.controls', 'javafx.fxml']
+    sdk = 'C:\\libs\\x86_64\\javafx-sdk-14.0.2.1'
+    modules = ['javafx.controls', 'javafx.graphics', 'javafx.fxml']
 }
 
 application {
@@ -70,9 +71,7 @@ application {
 }
 
 runtime {
-    additive = true
     options = ['--strip-debug', '--compress', '2', '--no-header-files', '--no-man-pages']
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
 
     launcher {
         noConsole = true
