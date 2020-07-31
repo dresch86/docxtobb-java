@@ -61,13 +61,22 @@ dependencies {
 }
 
 javafx {
-    sdk = 'C:\\libs\\x86_64\\javafx-sdk-14.0.2.1'
+    version = '14'
     modules = ['javafx.controls', 'javafx.graphics', 'javafx.fxml']
 }
 
 application {
     mainClassName = 'org.ose.docxtobb.Launcher'
     applicationName = 'docxtobb'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'org.ose.docxtobb.Launcher'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 runtime {
