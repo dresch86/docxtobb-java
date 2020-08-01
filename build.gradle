@@ -67,7 +67,7 @@ javafx {
 
 application {
     mainClassName = 'org.ose.docxtobb.Launcher'
-    applicationName = 'docxtobb'
+    applicationName = 'DocxToBB'
 }
 
 jar {
@@ -88,7 +88,10 @@ runtime {
 
     jpackage {
         if (org.gradle.internal.os.OperatingSystem.current().windows) {
+            imageName = 'DocxToBB'
+            installerName = 'DocxToBB_win_x64'
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
+            imageOptions = ['--icon', 'src/main/resources/mainIcon.ico']
         }
     }
 }
