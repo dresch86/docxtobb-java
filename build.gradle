@@ -87,11 +87,23 @@ runtime {
     }
 
     jpackage {
-        if (org.gradle.internal.os.OperatingSystem.current().windows) {
-            imageName = 'DocxToBB'
+        def currentOS = org.gradle.internal.os.OperatingSystem.current()
+        imageName = 'DocxToBB'
+
+        if (currentOS.isWindows()) {
             installerName = 'DocxToBB_win_x64'
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']
             imageOptions = ['--icon', 'src/main/resources/mainIcon.ico']
+        } else if (currentOS.isLinux()) {
+            installerName = 'DocxToBB_linux_x64'
+            installerOptions += ['--linux-shortcut', '--linux-app-category', 'Office', '--linux-menu-group', 'Application']
+            imageOptions = ['--icon', 'src/main/resources/mainIcon.svg']
+        } else if (currentOS.isMacOsX()) {
+            installerName = 'DocxToBB_macos_x64'
+            imageOptions = ['--icon', 'src/main/resources/mainIcon.icns']
+        } else {
+            println "Unsupported OS"
+            System.exit(1)
         }
     }
 }
