@@ -9,6 +9,8 @@ jobs:
     pool:
       vmImage: 'macOS-latest'
     steps:
+      - checkout: self
+        submodules: true
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -24,6 +26,8 @@ jobs:
     pool:
       vmImage: 'windows-latest'
     steps:
+      - checkout: self
+        submodules: true
       - task: Gradle@2
         inputs:
           workingDirectory: ''
@@ -39,6 +43,8 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+      - checkout: self
+        submodules: true
       - task: Gradle@2
         inputs:
           workingDirectory: ''
