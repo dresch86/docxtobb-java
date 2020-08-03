@@ -60,6 +60,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 }
 
+tasks.jar {
+    dependsOn ':third-party:wmf2svg:build'
+}
+
 javafx {
     version = '14'
     modules = ['javafx.controls', 'javafx.graphics', 'javafx.fxml']

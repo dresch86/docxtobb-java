@@ -22,4 +22,7 @@ branches:
   only:
     - master
 
-script: ./gradlew runtime jpackage
+script: ./gradlew jpackage
+
+deploy:
+  skip_cleanup: true
