@@ -90,6 +90,11 @@ runtime {
         def currentOS = org.gradle.internal.os.OperatingSystem.current()
         imageName = 'DocxToBB'
 
+        installerOptions += [
+            '--description', 'DocxToBB converts specially formatted Word documents to Blackboard Learn test packages',
+            '--copyright', 'Copyright 2020 Daniel J. Resch, Ph.D.'
+        ]
+
         if (currentOS.isWindows()) {
             installerName = 'DocxToBB_win_x64'
             installerOptions += ['--win-per-user-install', '--win-dir-chooser', '--win-menu', '--win-shortcut']

@@ -1,0 +1,25 @@
+language: java
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+jobs:
+  include:
+    - os: linux
+      dist: bionic
+      jdk: openjdk14
+    - os: osx
+      osx_image: xcode12
+      jdk: openjdk14
+
+branches:
+  only:
+    - master
+
+script: ./gradlew runtime jpackage
