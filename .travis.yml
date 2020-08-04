@@ -23,7 +23,7 @@ jobs:
 branches:
   only:
   - master
-script: gradlew clean jpackage
+script: ./gradlew clean jpackage
 deploy:
   provider: releases
   api_key:
