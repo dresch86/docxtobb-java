@@ -20,9 +20,6 @@ jobs:
   - os: osx
     osx_image: xcode12
     jdk: openjdk14
-branches:
-  only:
-  - master
 script: ./gradlew clean jpackage
 deploy:
   provider: releases
@@ -33,7 +30,6 @@ deploy:
     - build/jpackage/DocxToBB_linux_x64-*
     - build/jpackage/DocxToBB_macos_x64-*
   skip_cleanup: true
-  tag_name: "v1.0.0"
   on:
     repo: dresch86/docxtobb-java
     tags: true
