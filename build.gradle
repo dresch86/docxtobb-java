@@ -105,7 +105,7 @@ runtime {
             imageOptions = ['--icon', 'src/main/resources/mainIcon.ico']
         } else if (currentOS.isLinux()) {
             installerName = 'DocxToBB_linux_x64'
-            installerOptions += ['--linux-shortcut', '--linux-app-category', 'Office', '--linux-menu-group', 'Application']
+            installerOptions += ['--type', 'deb', '--linux-shortcut', '--linux-app-category', 'Office', '--linux-menu-group', 'Application']
             imageOptions = ['--icon', 'src/main/resources/mainIcon.png']
         } else if (currentOS.isMacOsX()) {
             installerName = 'DocxToBB_macos_x64'
