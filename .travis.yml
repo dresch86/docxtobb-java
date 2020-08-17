@@ -54,10 +54,10 @@ jobs:
       - choco install openjdk
       - powershell RefreshEnv
       - choco install gradle
+      - powershell RefreshEnv
       - choco install wixtoolset
       - powershell RefreshEnv
     script: 
-      - export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.2"
       - export PATH=$JAVA_HOME/bin:$PATH 
       - ./gradlew.bat clean jpackage
     deploy:
