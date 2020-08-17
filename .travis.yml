@@ -52,7 +52,8 @@ jobs:
       - choco install openjdk
       - choco install gradle
     script: 
-      - ./win-build.bat 
+      - export JAVA_HOME="/c/Program Files/OpenJDK"
+      - export PATH=$JAVA_HOME/bin:$PATH 
       - ./gradlew.bat clean jpackage
     deploy:
       provider: releases
