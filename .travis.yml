@@ -53,6 +53,7 @@ jobs:
       - choco install openjdk
       - choco install gradle
       - choco install wixtoolset
+      - powershell RefreshEnv
     script: 
       - powershell RefreshEnv && ./gradlew.bat clean jpackage
     deploy:
