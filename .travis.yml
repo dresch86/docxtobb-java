@@ -50,16 +50,11 @@ jobs:
     language: shell
     before_install:
       - powershell Install-WindowsFeature Net-Framework-Core
-      - powershell RefreshEnv
       - choco install openjdk
-      - powershell RefreshEnv
       - choco install gradle
-      - powershell RefreshEnv
       - choco install wixtoolset
-      - powershell RefreshEnv
     script: 
-      - export PATH=$JAVA_HOME/bin:$PATH 
-      - ./gradlew.bat clean jpackage
+      - cmd.exe /C "RefreshEnv.cmd & gradlew.bat clean jpackage"
     deploy:
       provider: releases
       token: $GITHUB_API_KEY
