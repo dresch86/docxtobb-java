@@ -51,6 +51,7 @@ jobs:
     before_install:
       - choco install openjdk
       - choco install gradle
+      - choco install wixtoolset
     script: 
       - export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.2"
       - export PATH=$JAVA_HOME/bin:$PATH 
