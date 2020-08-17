@@ -49,9 +49,13 @@ jobs:
   - os: windows
     language: shell
     before_install:
+      - powershell Install-WindowsFeature Net-Framework-Core
+      - powershell RefreshEnv
       - choco install openjdk
+      - powershell RefreshEnv
       - choco install gradle
       - choco install wixtoolset
+      - powershell RefreshEnv
     script: 
       - export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.2"
       - export PATH=$JAVA_HOME/bin:$PATH 
