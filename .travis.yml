@@ -54,7 +54,7 @@ jobs:
       - choco install gradle
       - choco install wixtoolset
     script: 
-      - cmd.exe /C "RefreshEnv.cmd & gradlew.bat clean jpackage"
+      - powershell RefreshEnv && ./gradlew.bat clean jpackage
     deploy:
       provider: releases
       token: $GITHUB_API_KEY
