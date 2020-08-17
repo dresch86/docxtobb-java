@@ -1,13 +1,13 @@
 language: java
+install:
+- true
 before_cache:
-- rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
-- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
 cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-install:
-- true
 jobs:
   include:
   - os: linux
@@ -17,21 +17,52 @@ jobs:
       apt:
         packages:
           - fakeroot
+    script: ./gradlew clean jpackage
+    deploy:
+      provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+        - "build/jpackage/*.deb"
+      skip_cleanup: true
+      on:
+        repo: dresch86/docxtobb-java
+        tags: true
+        branch: master
+      draft: true
   - os: osx
     osx_image: xcode12
     jdk: openjdk14
-script: ./gradlew clean jpackage
-deploy:
-  provider: releases
-  api_key:
-    secure: PjyFXSYIHudWQfINxecBKj7lpCc7qk0CDEsmqgl4BRNGdFI/WkE+IbXigWsXrxVw4ezNX8hmvBHqLOtLC3hYIIv98tJHiYQ+6+AbzO7g/7qbf6GsrlWbdEjbnO5Y+P8FLi/t8BN5LQISlHryy/rWOL0rNxma6V8scNDu/BWLaX8OF4IM3bEJjpec7EkpyybPc2v060vhKtqyWboba4Relvh5R3AqUTvLIEAQQ8yBn+8gFiLSm59abVi4HAJOiMIEqUj4hWl46jJjj8vLqaAXPmX41xJ7lYMu+ynDtTYuJ6jz9i38lepR+555NYR9AD2G/MEGBPyLkbIr6YG0X8TjWeNtfTiBkvhfvLf22d6o/2twbnxbeR3gkYoU7KVFnwVjxBhk4ggNQ8GwyiOSyDaQiJReOGJTf64mWIa4lqLjYlZPP34MbgiWDLaoEb3GQGlGaKGETaOzprv4dVxid2OwfCCgQS8swn9EZU2GNFvUYwzN0HpdzYHw2XWPlNsDOHrrZxfnYy9UAHfkkWAzfBVUnRtbmNChfLNRjZXWdf3rOcn4iNfXK1sBs/6fZDX91tEvprFZdyuHmm2QWv2T6r1kfeGH8AZThn5UuZT6AHb9Wixy1H0f2WRvFOJ/f7U9+P34rrGUjuhXymcVEgM730qnVud9t4g64w2tlHoCy4BWrXs=
-  file_glob: true
-  file:
-    - build/jpackage/DocxToBB_linux_x64-*
-    - build/jpackage/DocxToBB_macos_x64-*
-  skip_cleanup: true
-  on:
-    repo: dresch86/docxtobb-java
-    tags: true
-    branch: master
-  draft: true
+    script: ./gradlew clean jpackage
+    deploy:
+      provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+        - "build/jpackage/*.dmg"
+        - "build/jpackage/*.pkg"
+      skip_cleanup: true
+      on:
+        repo: dresch86/docxtobb-java
+        tags: true
+        branch: master
+      draft: true
+  - os: windows
+    language: shell
+    before_install:
+      - choco install openjdk
+      - choco install gradle
+    script: ./gradlew.bat clean jpackage
+    deploy:
+      provider: releases
+      api_key: $GITHUB_API_KEY
+      file_glob: true
+      file:
+        - "build/jpackage/*.exe"
+        - "build/jpackage/*.msi"
+      skip_cleanup: true
+      on:
+        repo: dresch86/docxtobb-java
+        tags: true
+        branch: master
+      draft: true

@@ -53,7 +53,7 @@ DocxToBB handles most of these shortcomings allowing flexibility and functionali
 *A: Yes, please create an [Issue](https://github.com/dresch86/docxtobb-java/issues) here on GitHub. Remember, this is and will be a community-driven effort so a request does not guarantee fulfillment. I will happily accept pull requests though! :-)*  
 
 **Q: Can I run DocxToBB on MacOS?**  
-*A: While the program will build and run on MacOS since its written in Java, I do not have Mac hardware to build a .dmg for distribution. I do expect in the near future to be able to remedy this, but for now I can only provide a Windows installer.* 
+*A: Since the program is Java based it will run on any platform that can run Java. Travis CI/CD builds the .dmg and .pkg files for release however they are not signed by Apple since I do not have an Apple Developers Account. If you try to run the macOS files under releases you will get an error that they are damaged when they are not. To install unsigned macOS applications please see the [following link](https://secure.clcbio.com/helpspot/index.php?pg=kb.page&id=323).*  
 
 ## Requirements
 ### For Running
@@ -71,3 +71,6 @@ DocxToBB handles most of these shortcomings allowing flexibility and functionali
 - [X] Test handling of image resourcess
 - [ ] Write users manual (i.e. Wiki)
 - [X] Add release version
+
+## Patreon
+If you would like to support this project please consider becoming a [Patreon](https://www.patreon.com/dresch86). Patreons have additional perks in steering the project direction / feature set.
