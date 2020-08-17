@@ -50,12 +50,14 @@ jobs:
     language: shell
     before_install:
       - powershell Install-WindowsFeature Net-Framework-Core
-      - choco install openjdk
+      - choco install openjdk --version 14.0.2
       - choco install gradle
       - choco install wixtoolset
-      - powershell RefreshEnv
     script: 
-      - powershell RefreshEnv && ./gradlew.bat clean jpackage
+      - export GRADLE_OPTS="-Dorg.gradle.daemon=false $GRADLE_OPTS"
+      - export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.2"
+      - export PATH="$JAVA_HOME/bin:$PATH"
+      - gradlew.bat clean jpackage
     deploy:
       provider: releases
       token: $GITHUB_API_KEY
