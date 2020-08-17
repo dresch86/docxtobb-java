@@ -50,7 +50,7 @@ jobs:
     language: shell
     before_install:
       - powershell Install-WindowsFeature Net-Framework-Core
-      - choco install openjdk --version 14.0.2
+      - choco install openjdk --version=14.0.2
       - choco install gradle
       - choco install wixtoolset
     script: 
