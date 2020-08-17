@@ -57,7 +57,7 @@ jobs:
       - export GRADLE_OPTS="-Dorg.gradle.daemon=false $GRADLE_OPTS"
       - export JAVA_HOME="/c/Program Files/OpenJDK/jdk-14.0.2"
       - export PATH="$JAVA_HOME/bin:$PATH"
-      - gradlew.bat clean jpackage
+      - ./gradlew.bat clean jpackage
     deploy:
       provider: releases
       token: $GITHUB_API_KEY
