@@ -29,7 +29,6 @@ jobs:
       on:
         repo: dresch86/docxtobb-java
         tags: true
-      draft: true
   - os: osx
     osx_image: xcode12
     jdk: openjdk14
@@ -45,7 +44,6 @@ jobs:
       on:
         repo: dresch86/docxtobb-java
         tags: true
-      draft: true
   - os: windows
     language: shell
     before_install:
@@ -69,4 +67,3 @@ jobs:
       on:
         repo: dresch86/docxtobb-java
         tags: true
-      draft: true

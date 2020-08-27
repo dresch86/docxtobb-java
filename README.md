@@ -15,6 +15,10 @@ Most converters that accept .doc(x) or .txt **[See Note 1]** files:
 
 DocxToBB handles most of these shortcomings allowing flexibility and functionality to take priority.
 
+## Tutorials
+[Installing and Creating Test Packages](https://youtu.be/4PlM02fr86s)  
+[Uploading Test Packages](https://youtu.be/uFkbHT1vVq8)
+
 ## FAQ
 **Q: What is the goal of this project?**  
 *A: To serve as a tool allowing educators to easily adapt their examination materials from a face to face to online environment using a common functional format.*  
@@ -58,7 +62,9 @@ DocxToBB handles most of these shortcomings allowing flexibility and functionali
 ## Requirements
 ### For Running
 - Windows 7+
-- Linux (comming soon)
+- macOS
+- Debian Based Linux
+- Other Linux Distros (comming soon)
 ### For Building
 - Git
 - Java 13 (for packaging) or higher
@@ -68,8 +74,9 @@ DocxToBB handles most of these shortcomings allowing flexibility and functionali
 ## TODO List
 - [X] Add better error reporting interfaces
 - [ ] Generate a log file of process
-- [X] Test handling of image resourcess
-- [ ] Write users manual (i.e. Wiki)
+- [X] Test handling of image resources
+- [X] Create video tutorials
+- [ ] Write detailed user manual (i.e. Wiki)
 - [X] Add release version
 
 ## Patreon
