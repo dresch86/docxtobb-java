@@ -133,9 +133,7 @@ public class Questions {
 
         if (matQuestionLbl.matches()) {
             sSanitizedQuestionHTML = questionHTML.substring(0, matQuestionLbl.start(1)) + questionHTML.substring(matQuestionLbl.end(1));
-        } else {
-            System.out.println(questionHTML);
-        }
+        } 
 
         return sSanitizedQuestionHTML;
     }
@@ -352,21 +350,23 @@ public class Questions {
                     elAnsLabelBox = elsAnswerLayer.get(k).selectFirst("p");
                     elAnsContent = elsAnswerLayer.get(k+1).selectFirst("p");
 
-                    if (!elAnsLabelBox.select("strong").isEmpty()) {
-                        // Found a correct answer indicated by bold face font
-                        Elements elsAnswerContentBolded = elAnsContent.select("strong");
-                        ++iCorrectAnswers;
-
-                        if (elsAnswerContentBolded.size() == 1) {
-                            tmResponses.put(elAnsLabelBox.text(), 
-                                            new Pair<Boolean,Element>(Boolean.TRUE, elsAnswerContentBolded.get(0)));
+                    if ((elAnsLabelBox != null) && (elAnsContent != null)) {
+                        if (!elAnsLabelBox.select("strong").isEmpty()) {
+                            // Found a correct answer indicated by bold face font
+                            Elements elsAnswerContentBolded = elAnsContent.select("strong");
+                            ++iCorrectAnswers;
+    
+                            if (elsAnswerContentBolded.size() == 1) {
+                                tmResponses.put(elAnsLabelBox.text(), 
+                                                new Pair<Boolean,Element>(Boolean.TRUE, elsAnswerContentBolded.get(0)));
+                            } else {
+                                tmResponses.put(elAnsLabelBox.text(), 
+                                                new Pair<Boolean,Element>(Boolean.TRUE, elAnsContent));
+                            }
                         } else {
                             tmResponses.put(elAnsLabelBox.text(), 
-                                            new Pair<Boolean,Element>(Boolean.TRUE, elAnsContent));
+                                            new Pair<Boolean,Element>(Boolean.FALSE, elAnsContent));
                         }
-                    } else {
-                        tmResponses.put(elAnsLabelBox.text(), 
-                                        new Pair<Boolean,Element>(Boolean.FALSE, elAnsContent));
                     }
                 }
             }
