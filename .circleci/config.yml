@@ -2,25 +2,109 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
+orbs:
+  win: circleci/windows@5.0.0
+  macos: circleci/macos@2.4.0
+  gh: circleci/github-cli@2.2.0
+
+aliases:
+  - &tags_only
+    branches:
+      ignore: /.*/
+    tags:
+      only: /^v\d+\.\d+\.\d+$/
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/configuration-reference/#jobs
 jobs:
-  say-hello:
-    # Specify the execution environment. You can specify an image from Docker Hub or use one of our convenience images from CircleCI's Developer Hub.
-    # See: https://circleci.com/docs/configuration-reference/#executor-job
+  create-multi-release:
     docker:
       - image: cimg/base:stable
-    # Add steps to the job
-    # See: https://circleci.com/docs/configuration-reference/#steps
     steps:
       - checkout
+      - gh/install
       - run:
-          name: "Say hello"
-          command: "echo Hello, World!"
+          command: |
+            gh release create $CIRCLE_TAG -F $GH_NOTES_FILE
+          environment:
+            GH_NOTES_FILE: CHANGELOG.md
+  win-build:
+    executor:
+      name: win/default
+      shell: powershell.exe
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "8e:d0:69:e0:93:9f:9c:90:91:3c:b5:6c:42:c0:0d:4e"
+      - checkout
+      - run: New-Item 'C:\Downloads' -ItemType Directory -ea 0
+      - run: Invoke-WebRequest https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.msi -OutFile C:\Downloads\openjdk21.msi
+      - run: New-Item 'C:\Java' -ItemType Directory -ea 0
+      - run: Start-Process -Wait -FilePath msiexec -ArgumentList /i, "C:\Downloads\openjdk21.msi", "ADDLOCAL=FeatureMain,FeatureEnvironment,FeatureJarFileRunWith,FeatureJavaHome", 'INSTALLDIR="C:\Java"', /quiet -Verb RunAs
+      - run: Invoke-WebRequest https://services.gradle.org/distributions/gradle-8.4-bin.zip -OutFile C:\Downloads\gradle-8.4-bin.zip
+      - run: New-Item 'C:\Gradle' -ItemType Directory -ea 0
+      - run: Expand-Archive -Path C:\Downloads\gradle-8.4-bin.zip -DestinationPath 'C:\Gradle'
+      - run: Invoke-WebRequest https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_windows-x64_bin-jmods.zip -OutFile C:\Downloads\openjfx-21.0.1_windows-x64_bin-jmods.zip
+      - run: New-Item 'C:\Java\jfx-21.0.1-jmods' -ItemType Directory -ea 0
+      - run: Expand-Archive -Path C:\Downloads\openjfx-21.0.1_windows-x64_bin-jmods.zip -DestinationPath 'C:\Java'
+      - run: Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip -OutFile C:\Downloads\wix311-binaries.zip
+      - run: New-Item 'C:\WiX' -ItemType Directory -ea 0
+      - run: Expand-Archive -Path C:\Downloads\wix311-binaries.zip -DestinationPath 'C:\WiX'
+      - run: choco install -y gh
+      - run: choco install -y innosetup
+      - run:
+          shell: cmd.exe
+          command: set PATH=%PATH%;C:\Java\bin;C:\Gradle\gradle-8.4\bin;C:\WiX & set PATH_TO_FX_MODS=C:\Java\javafx-jmods-21.0.1 & gradle clean packageDocxToBB
+      - run: |
+          Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1; `
+            refreshenv; `
+            Write-Output "Uploading tag [$env:CIRCLE_TAG] to release..."; `
+            gh release upload "$env:CIRCLE_TAG" (get-item .\app\build\*.exe) --clobber
+  macos-build:
+    macos:
+      xcode: 15.0.1
+    steps:
+      - checkout
+      - run: brew tap bell-sw/liberica
+      - run: brew install --cask liberica-jdk21-lite
+      - run: brew install gradle
+      - run: brew install gh
+      - run: wget -O /tmp/openjfx-21.0.1_osx-x64_bin-jmods.zip https://download2.gluonhq.com/openjfx/21.0.1/openjfx-21.0.1_osx-x64_bin-jmods.zip
+      - run: sudo mkdir -p /opt/java && sudo unzip /tmp/openjfx-21.0.1_osx-x64_bin-jmods.zip -d /opt/java
+      - run: sudo PATH_TO_FX_MODS=/opt/java/javafx-jmods-21.0.1 gradle clean packageDocxToBB
+      - run: |
+          gh release upload $CIRCLE_TAG ./app/build/*.pkg --clobber
+  linux-build:
+    docker:
+      - image: cimg/openjdk:20.0.2
+    steps:
+      - checkout
+      - gh/install
+      - run: java --version
+      - run: wget -O /tmp/openjfx-20.0.2_linux-x64_bin-jmods.zip https://download2.gluonhq.com/openjfx/20.0.2/openjfx-20.0.2_linux-x64_bin-jmods.zip
+      - run: sudo mkdir -p /opt/java
+      - run: sudo unzip /tmp/openjfx-20.0.2_linux-x64_bin-jmods.zip -d /opt/java
+      - run: sudo chmod +x ./gradlew
+      - run: sudo PATH_TO_FX_MODS=/opt/java/javafx-jmods-20.0.2 ./gradlew clean packageDocxToBB
+      - run: |
+          gh release upload $CIRCLE_TAG ./app/build/*.deb --clobber
 
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
-  say-hello-workflow:
+  multiplatform:
     jobs:
-      - say-hello
+      - create-multi-release:
+          filters: *tags_only
+      - win-build:
+          requires:
+            - create-multi-release
+          filters: *tags_only
+      - macos-build:
+          requires:
+            - create-multi-release
+          filters: *tags_only
+      - linux-build:
+          requires:
+            - create-multi-release
+          filters: *tags_only

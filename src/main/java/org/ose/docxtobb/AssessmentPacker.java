@@ -111,7 +111,7 @@ public class AssessmentPacker {
             String sFilename = "";
             String sResId = "";
 
-            if (sFileExt == "wmf") {
+            if (sFileExt.equals("wmf")) {
                 final SvgGdi sgWMFtoSVGHandler = new SvgGdi(true);
                 sgWMFtoSVGHandler.setReplaceSymbolFont(true);
 
@@ -120,16 +120,13 @@ public class AssessmentPacker {
 
                 sResId = RandomStringUtils.random(7, false, true) + "_1";
                 sFilename = "Image_" + iImageCount + "__xid-" + sResId + ".svg";
-                ByteArrayOutputStream osImageStream = null;
+                //ByteArrayOutputStream osImageStream = null;
 
-                try {
-                    osImageStream = new ByteArrayOutputStream();
+                try (ByteArrayOutputStream osImageStream = new ByteArrayOutputStream()) {
                     sgWMFtoSVGHandler.write(osImageStream);
                     imImageMgr.cacheImage(sResId, sFilename, osImageStream.toByteArray());
                 } catch (IOException ioe) {
                     lMainLogger.error(ioe.getMessage());
-                } finally {
-                    if (osImageStream != null) osImageStream.close();
                 }
             } else {
                 sResId = RandomStringUtils.random(7, false, true) + "_1";
@@ -174,7 +171,7 @@ public class AssessmentPacker {
 
         String sResult = qQuestionHandler.processHTML(html);
 
-        if (sResult == "") {
+        if (sResult.equals("")) {
             lMainLogger.info("Conversion completed successfully without warnings!");
         } else {
             lMainLogger.warn(sResult);
